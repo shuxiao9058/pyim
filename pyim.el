@@ -1076,7 +1076,7 @@ pyim 内建的有三种选词框格式：
   :group 'pyim
   :type 'integer)
 
-(defcustom pyim-autoselector '(pyim-autoselector-xingma)
+(defcustom pyim-autoselector '(pyim-autoselector-xingma pyim-autoselector-rime)
   "已经启用的自动上屏器.
 
 自动上屏器是一个函数，如果这个函数返回t, 那么当前的词条就会自动
@@ -2112,6 +2112,21 @@ Return the input string.
          (n (pyim-scheme-get-option scheme-name :code-split-length)))
     (and (eq class 'xingma)
          (= (length (pyim-entered-get)) n))))
+
+(defun pyim-autoselector-rime (&rest args)
+  "适用于rime型码输入法的自动上屏器.
+
+比如：五笔等型码输入法，重码率很低，90%以上的情况都是选择第一个词
+条，自动选择可以减少按空格强制选词的机会。"
+    (let* ((scheme-name (pyim-scheme-name))
+           (class (pyim-scheme-get-option scheme-name :class)))
+            (when (and (eq class 'rime) (functionp 'liberime-get-schema-config))
+                (let* ((max-code-length (liberime-get-schema-config nil "speller/max_code_length" "int")))
+                    (= (length (pyim-entered-get)) max-code-length)
+                    )
+                )
+    )
+  )
 
 (defun pyim-self-insert-command ()
   "Pyim 版本的 self-insert-command."
